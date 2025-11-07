@@ -1,0 +1,5 @@
+{
+  "name": "Acuitant Asset Manager",
+  "description": "A modern, responsive web application for identifying and managing office assets. Users can filter assets by category and view detailed information in a clean, organized table.",
+  "requestFramePermissions": []
+}

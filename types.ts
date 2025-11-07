@@ -23,3 +23,12 @@ export interface Asset {
     category_id?: number;
     category?: string; // from JOIN
 }
+
+export type AssetSortKey = 'asset_code' | 'asset_name' | 'status' | 'quantity' | 'location' | 'assigned_to';
+
+export type SortDirection = 'asc' | 'desc';
+
+export interface AssetSortConfig {
+    key: AssetSortKey;
+    direction: SortDirection;
+}

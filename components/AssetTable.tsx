@@ -1,9 +1,31 @@
 import React from 'react';
-import type { Asset } from '../types';
+import type { Asset, AssetSortConfig, AssetSortKey, SortDirection } from '../types';
 import { SearchIcon } from './icons/SearchIcon';
 import { PlusIcon } from './icons/PlusIcon';
 import { StatusPill } from './StatusPill';
 import { TrashIcon } from './icons/TrashIcon';
+
+type SortState = SortDirection | null;
+
+const SortIcon: React.FC<{ state: SortState }> = ({ state }) => (
+    <svg
+        viewBox="0 0 20 20"
+        fill="none"
+        className="ml-1 h-3.5 w-3.5 flex-shrink-0"
+        aria-hidden="true"
+    >
+        <path
+            d="M10 5l-3.5 4h7L10 5z"
+            className={state === 'asc' ? 'text-red-600' : 'text-gray-300'}
+            fill="currentColor"
+        />
+        <path
+            d="M10 15l3.5-4h-7L10 15z"
+            className={state === 'desc' ? 'text-red-600' : 'text-gray-300'}
+            fill="currentColor"
+        />
+    </svg>
+);
 
 interface AssetTableProps {
     assets: Asset[];
@@ -11,12 +33,32 @@ interface AssetTableProps {
     setSearchTerm: (term: string) => void;
     onAddAssetClick: () => void;
     onSelectAsset: (asset: Asset) => void;
-    onDeleteRequest: (assetId: string) => void;
+    onDeleteRequest: (assetId: number) => void;
+    sortConfig: AssetSortConfig | null;
+    onSort: (key: AssetSortKey) => void;
 }
 
-const AssetTable: React.FC<AssetTableProps> = ({ assets, searchTerm, setSearchTerm, onAddAssetClick, onSelectAsset, onDeleteRequest }) => {
+const sortableColumns: Array<{ key: AssetSortKey; label: string }> = [
+    { key: 'asset_code', label: 'Asset Code' },
+    { key: 'asset_name', label: 'Asset Name' },
+    { key: 'status', label: 'Status' },
+    { key: 'quantity', label: 'Quantity' },
+    { key: 'location', label: 'Location' },
+    { key: 'assigned_to', label: 'Assigned To' },
+];
+
+const AssetTable: React.FC<AssetTableProps> = ({
+    assets,
+    searchTerm,
+    setSearchTerm,
+    onAddAssetClick,
+    onSelectAsset,
+    onDeleteRequest,
+    sortConfig,
+    onSort,
+}) => {
     
-    const handleDeleteClick = (e: React.MouseEvent, assetId: string) => {
+    const handleDeleteClick = (e: React.MouseEvent, assetId: number) => {
         e.stopPropagation();
         onDeleteRequest(assetId);
     };
@@ -51,12 +93,22 @@ const AssetTable: React.FC<AssetTableProps> = ({ assets, searchTerm, setSearchTe
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                         <tr>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asset Code</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asset Name</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned To</th>
+                            {sortableColumns.map(({ key, label }) => {
+                                const state: SortState = sortConfig?.key === key ? sortConfig.direction : null;
+                                return (
+                                    <th key={key} scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <button
+                                            type="button"
+                                            onClick={() => onSort(key)}
+                                            className="inline-flex items-center text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-50"
+                                            aria-pressed={sortConfig?.key === key}
+                                        >
+                                            <span>{label}</span>
+                                            <SortIcon state={state} />
+                                        </button>
+                                    </th>
+                                );
+                            })}
                             <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>

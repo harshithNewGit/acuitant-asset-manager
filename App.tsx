@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import type { Asset, Category } from './types';
+import type { Asset, Category, AssetSortConfig, AssetSortKey } from './types';
 import { CATEGORIES } from './constants';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
@@ -15,6 +15,7 @@ const App: React.FC = () => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string>('All');
     const [searchTerm, setSearchTerm] = useState<string>('');
+    const [sortConfig, setSortConfig] = useState<AssetSortConfig | null>(null);
     const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
     const [assetToEdit, setAssetToEdit] = useState<Asset | null>(null);
@@ -56,6 +57,33 @@ const App: React.FC = () => {
                 return categoryMatch && searchMatch;
             });
     }, [assets, selectedCategory, searchTerm]);
+
+    const sortedAssets = useMemo(() => {
+        if (!sortConfig) {
+            return filteredAssets;
+        }
+
+        const sorted = [...filteredAssets];
+        sorted.sort((a, b) => {
+            const { key, direction } = sortConfig;
+            const directionMultiplier = direction === 'asc' ? 1 : -1;
+            const aValue = a[key];
+            const bValue = b[key];
+
+            if (typeof aValue === 'number' && typeof bValue === 'number') {
+                return (aValue - bValue) * directionMultiplier;
+            }
+
+            const aText = (aValue ?? '').toString().toLowerCase();
+            const bText = (bValue ?? '').toString().toLowerCase();
+
+            if (aText < bText) return -1 * directionMultiplier;
+            if (aText > bText) return 1 * directionMultiplier;
+            return 0;
+        });
+
+        return sorted;
+    }, [filteredAssets, sortConfig]);
 
     const handleAddCategory = async (newCategory: Omit<Category, 'id'>) => {
         if (newCategory.name && !categories.find(c => c.name.toLowerCase() === newCategory.name.toLowerCase())) {
@@ -168,6 +196,15 @@ const App: React.FC = () => {
         setAssetToDeleteId(null);
     };
 
+    const handleSort = (key: AssetSortKey) => {
+        setSortConfig(prev => {
+            if (prev?.key === key) {
+                return { key, direction: prev.direction === 'asc' ? 'desc' : 'asc' };
+            }
+            return { key, direction: 'asc' };
+        });
+    };
+
     return (
         <div className="min-h-screen bg-gray-100 text-gray-800">
             <Header />
@@ -191,12 +228,14 @@ const App: React.FC = () => {
 
                         <div className="mt-6 lg:mt-0 lg:col-span-9 xl:col-span-10">
                            <AssetTable
-                                assets={filteredAssets}
+                                assets={sortedAssets}
                                 searchTerm={searchTerm}
                                 setSearchTerm={setSearchTerm}
                                 onAddAssetClick={() => setIsAddModalOpen(true)}
                                 onSelectAsset={handleSelectAsset}
                                 onDeleteRequest={handleDeleteRequest}
+                                sortConfig={sortConfig}
+                                onSort={handleSort}
                            />
                         </div>
                     </div>

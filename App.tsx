@@ -20,6 +20,8 @@ const App: React.FC = () => {
     const [assetToEdit, setAssetToEdit] = useState<Asset | null>(null);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState<boolean>(false);
     const [assetToDeleteId, setAssetToDeleteId] = useState<number | null>(null);
+    const [isCategoryConfirmModalOpen, setIsCategoryConfirmModalOpen] = useState<boolean>(false);
+    const [categoryToDeleteId, setCategoryToDeleteId] = useState<number | null>(null);
 
     const fetchData = async () => {
         try {
@@ -72,7 +74,31 @@ const App: React.FC = () => {
         }
     };
 
-    const handleAddAsset = async (assetData: Omit<Asset, 'id' | 'category'>) => {
+    const handleDeleteCategoryRequest = (categoryId: number) => {
+        setCategoryToDeleteId(categoryId);
+        setIsCategoryConfirmModalOpen(true);
+    };
+
+    const handleConfirmDeleteCategory = async () => {
+        if (!categoryToDeleteId) return;
+        try {
+            const response = await fetch(`${API_BASE_URL}/categories/${categoryToDeleteId}`, {
+                method: 'DELETE',
+            });
+            if (response.ok) {
+                setSelectedCategory('All'); // Reset to 'All' as the deleted category might have been selected
+                await fetchData(); // Refetch to get the latest state
+            }
+        } catch (error) {
+            console.error("Failed to delete category:", error);
+        }
+
+        setIsCategoryConfirmModalOpen(false);
+        setCategoryToDeleteId(null);
+    };
+
+
+    const handleAddAsset = async (assetData: Omit<Asset, 'id' | 'category'> & { category_id: number }) => {
         try {
             const response = await fetch(`${API_BASE_URL}/assets`, { // Corrected path
                 method: 'POST',
@@ -143,12 +169,12 @@ const App: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 text-gray-800">
+        <div className="min-h-screen bg-gray-100 text-gray-800">
             <Header />
             <main className="p-4 sm:p-6 lg:p-8">
                 <div className="max-w-7xl mx-auto">
                     <div className="mb-6">
-                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Assets Overview</h1>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-[#221F20]">Assets Overview</h1>
                         <p className="mt-1 text-sm text-gray-600">Manage and track all company assets from one place.</p>
                     </div>
 
@@ -159,6 +185,7 @@ const App: React.FC = () => {
                                 selectedCategory={selectedCategory}
                                 onSelectCategory={setSelectedCategory}
                                 onAddCategory={handleAddCategory}
+                                onDeleteCategory={handleDeleteCategoryRequest}
                             />
                         </div>
 
@@ -195,6 +222,13 @@ const App: React.FC = () => {
                 onConfirm={handleConfirmDelete}
                 title="Delete Asset"
                 message="Are you sure you want to delete this asset? This action cannot be undone."
+            />
+            <ConfirmationModal
+                isOpen={isCategoryConfirmModalOpen}
+                onClose={() => setIsCategoryConfirmModalOpen(false)}
+                onConfirm={handleConfirmDeleteCategory}
+                title="Delete Category"
+                message="Are you sure you want to delete this category? All assets in this category will have their category unset. This action cannot be undone."
             />
         </div>
     );

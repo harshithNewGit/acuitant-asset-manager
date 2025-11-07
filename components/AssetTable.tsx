@@ -33,14 +33,14 @@ const AssetTable: React.FC<AssetTableProps> = ({ assets, searchTerm, setSearchTe
                         placeholder="Search by name, code, user..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-red-500 focus:border-red-500 sm:text-sm"
                     />
                 </div>
                 <div className="mt-3 sm:mt-0 sm:ml-4">
                     <button
                         type="button"
                         onClick={onAddAssetClick}
-                        className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-[#DA3832] hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                     >
                         <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
                         Add Asset
@@ -64,8 +64,8 @@ const AssetTable: React.FC<AssetTableProps> = ({ assets, searchTerm, setSearchTe
                         {assets.length > 0 ? (
                             assets.map(asset => (
                                 <tr key={asset.id} onClick={() => onSelectAsset(asset)} className="hover:bg-gray-50 transition-colors cursor-pointer">
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-indigo-600">{asset.asset_code}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{asset.asset_name}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-red-600">{asset.asset_code}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#221F20]">{asset.asset_name}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         <StatusPill status={asset.status} />
                                     </td>

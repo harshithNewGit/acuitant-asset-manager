@@ -1,14 +1,17 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import type { Asset, Category, AssetSortConfig, AssetSortKey } from './types';
 import { CATEGORIES } from './constants';
+import { API_BASE_URL } from './config';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import AssetTable from './components/AssetTable';
 import AddAssetModal from './components/AddAssetModal';
 import EditAssetModal from './components/EditAssetModal';
 import ConfirmationModal from './components/ConfirmationModal';
+import DashboardOverview from './components/DashboardOverview';
+import TodoList from './components/TodoList';
 
-const API_BASE_URL = 'http://localhost:3001'; // Your backend server URL
+type DashboardFilterKey = 'all' | 'in_use' | 'in_storage' | 'for_repair';
 
 const App: React.FC = () => {
     const [assets, setAssets] = useState<Asset[]>([]);
@@ -23,6 +26,7 @@ const App: React.FC = () => {
     const [assetToDeleteId, setAssetToDeleteId] = useState<number | null>(null);
     const [isCategoryConfirmModalOpen, setIsCategoryConfirmModalOpen] = useState<boolean>(false);
     const [categoryToDeleteId, setCategoryToDeleteId] = useState<number | null>(null);
+    const [dashboardFilter, setDashboardFilter] = useState<DashboardFilterKey>('all');
 
     const fetchData = async () => {
         try {
@@ -46,17 +50,23 @@ const App: React.FC = () => {
 
 
     const filteredAssets = useMemo(() => {
-        return assets
-            .filter(asset => {
-                const categoryMatch = selectedCategory === 'All' || asset.category === selectedCategory;
-                const searchMatch = searchTerm === '' ||
-                    asset.asset_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    asset.asset_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    (asset.assigned_to && asset.assigned_to.toLowerCase().includes(searchTerm.toLowerCase())) ||
-                    (asset.location && asset.location.toLowerCase().includes(searchTerm.toLowerCase()));
-                return categoryMatch && searchMatch;
-            });
-    }, [assets, selectedCategory, searchTerm]);
+        const statusFilter =
+            dashboardFilter === 'in_use' ? 'In Use' :
+            dashboardFilter === 'in_storage' ? 'In Storage' :
+            dashboardFilter === 'for_repair' ? 'For Repair' :
+            null;
+
+        return assets.filter(asset => {
+            const categoryMatch = selectedCategory === 'All' || asset.category === selectedCategory;
+            const searchMatch = searchTerm === '' ||
+                asset.asset_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                asset.asset_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (asset.assigned_to && asset.assigned_to.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                (asset.location && asset.location.toLowerCase().includes(searchTerm.toLowerCase()));
+            const statusMatch = !statusFilter || asset.status === statusFilter;
+            return categoryMatch && searchMatch && statusMatch;
+        });
+    }, [assets, selectedCategory, searchTerm, dashboardFilter]);
 
     const sortedAssets = useMemo(() => {
         if (!sortConfig) {
@@ -215,7 +225,14 @@ const App: React.FC = () => {
                         <p className="mt-1 text-sm text-gray-600">Manage and track all company assets from one place.</p>
                     </div>
 
-                    <div className="lg:grid lg:grid-cols-12 lg:gap-8">
+                    <DashboardOverview
+                        assets={assets}
+                        categories={categories}
+                        activeFilter={dashboardFilter}
+                        onFilterChange={setDashboardFilter}
+                    />
+
+                    <div className="lg:grid lg:grid-cols-12 lg:gap-8 mt-6">
                         <div className="lg:col-span-3 xl:col-span-2">
                              <Sidebar
                                 categories={categories}
@@ -226,7 +243,8 @@ const App: React.FC = () => {
                             />
                         </div>
 
-                        <div className="mt-6 lg:mt-0 lg:col-span-9 xl:col-span-10">
+                        <div className="mt-6 lg:mt-0 lg:col-span-9 xl:col-span-10 space-y-6">
+                           <TodoList />
                            <AssetTable
                                 assets={sortedAssets}
                                 searchTerm={searchTerm}

@@ -29,8 +29,6 @@ pool.query('SELECT NOW()', (err, res) => {
     }
 });
 
-// --- API endpoints will go here ---
-
 // GET all assets
 app.get('/assets', async (req, res) => {
     try {
@@ -158,6 +156,89 @@ app.delete('/assets/:id', async (req, res) => {
         res.status(204).send(); // No Content
     } catch (err) {
         console.error('Error executing query', err.stack);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// --- Todos API ---
+
+// GET all todos
+app.get('/todos', async (req, res) => {
+    try {
+        const { rows } = await pool.query(
+            'SELECT id, text, done, note FROM todos ORDER BY created_at DESC'
+        );
+        res.json(rows);
+    } catch (err) {
+        console.error('Error fetching todos', err.stack);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// POST a new todo
+app.post('/todos', async (req, res) => {
+    const { text, note } = req.body;
+
+    if (!text || typeof text !== 'string') {
+        return res.status(400).json({ error: 'Todo text is required' });
+    }
+
+    try {
+        const { rows } = await pool.query(
+            'INSERT INTO todos (text, note) VALUES ($1, $2) RETURNING id, text, done, note',
+            [text.trim(), note ?? null]
+        );
+        res.status(201).json(rows[0]);
+    } catch (err) {
+        console.error('Error creating todo', err.stack);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// PATCH (update) a todo's done status and note
+app.patch('/todos/:id', async (req, res) => {
+    const { id } = req.params;
+    const { done, note } = req.body;
+
+    const todoId = Number(id);
+    if (!Number.isInteger(todoId)) {
+        return res.status(400).json({ error: 'Invalid todo id' });
+    }
+
+    try {
+        const { rows } = await pool.query(
+            'UPDATE todos SET done = $1, note = $2 WHERE id = $3 RETURNING id, text, done, note',
+            [!!done, note ?? null, todoId]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({ error: 'Todo not found' });
+        }
+
+        res.json(rows[0]);
+    } catch (err) {
+        console.error('Error updating todo', err.stack);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// DELETE a todo by ID
+app.delete('/todos/:id', async (req, res) => {
+    const { id } = req.params;
+
+    const todoId = Number(id);
+    if (!Number.isInteger(todoId)) {
+        return res.status(400).json({ error: 'Invalid todo id' });
+    }
+
+    try {
+        const deleteOp = await pool.query('DELETE FROM todos WHERE id = $1', [todoId]);
+        if (deleteOp.rowCount === 0) {
+            return res.status(404).json({ error: 'Todo not found' });
+        }
+        res.status(204).send();
+    } catch (err) {
+        console.error('Error deleting todo', err.stack);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });

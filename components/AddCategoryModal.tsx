@@ -26,7 +26,7 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({ isOpen, onClose, on
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4" aria-modal="true" role="dialog">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
                 <div className="p-6">
                     <div className="flex justify-between items-center pb-4 border-b border-gray-200">
                         <h3 className="text-xl font-semibold text-gray-900">Add New Category</h3>
@@ -44,7 +44,7 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({ isOpen, onClose, on
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 placeholder="Enter category name"
-                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 sm:text-sm"
                                 required
                             />
                         </div>
@@ -56,7 +56,7 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({ isOpen, onClose, on
                                 onChange={(e) => setDescription(e.target.value)}
                                 placeholder="Enter a short description (optional)"
                                 rows={3}
-                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 sm:text-sm"
                             ></textarea>
                         </div>
                         <div className="pt-6 border-t border-gray-200 flex justify-end space-x-3">

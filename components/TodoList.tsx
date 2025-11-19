@@ -252,12 +252,12 @@ const TodoList: React.FC = () => {
 
             {activeItem && (
                 <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex justify-center items-center p-4" aria-modal="true" role="dialog">
-                    <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[80vh] overflow-y-auto">
                         <div className="p-6">
-                            <h3 className="text-lg leading-6 font-medium text-gray-900 mb-1">
+                            <h3 className="text-xl leading-6 font-semibold text-gray-900 mb-2">
                                 Note for task
                             </h3>
-                            <p className="text-sm text-gray-500 mb-3">
+                            <p className="text-sm text-gray-600 mb-3">
                                 {activeItem.text}
                             </p>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -266,8 +266,8 @@ const TodoList: React.FC = () => {
                             <textarea
                                 value={noteDraft}
                                 onChange={(e) => setNoteDraft(e.target.value)}
-                                rows={4}
-                                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2 text-sm focus:border-red-500 focus:ring-red-500"
+                                rows={6}
+                                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
                                 placeholder="Add context, next steps, or details related to this task."
                             />
                         </div>

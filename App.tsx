@@ -51,9 +51,9 @@ const App: React.FC = () => {
 
     const filteredAssets = useMemo(() => {
         const statusFilter =
-            dashboardFilter === 'in_use' ? 'In Use' :
-            dashboardFilter === 'in_storage' ? 'In Storage' :
-            dashboardFilter === 'for_repair' ? 'For Repair' :
+            dashboardFilter === 'in_use' ? 'in use' :
+            dashboardFilter === 'in_storage' ? 'in storage' :
+            dashboardFilter === 'for_repair' ? 'for repair' :
             null;
 
         return assets.filter(asset => {
@@ -63,7 +63,8 @@ const App: React.FC = () => {
                 asset.asset_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 (asset.assigned_to && asset.assigned_to.toLowerCase().includes(searchTerm.toLowerCase())) ||
                 (asset.location && asset.location.toLowerCase().includes(searchTerm.toLowerCase()));
-            const statusMatch = !statusFilter || asset.status === statusFilter;
+            const statusMatch = !statusFilter ||
+                (asset.status && asset.status.toLowerCase() === statusFilter);
             return categoryMatch && searchMatch && statusMatch;
         });
     }, [assets, selectedCategory, searchTerm, dashboardFilter]);
@@ -216,10 +217,10 @@ const App: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 text-gray-800">
+        <div className="min-h-screen bg-gray-100 text-gray-800 flex flex-col">
             <Header />
-            <main className="p-4 sm:p-6 lg:p-8">
-                <div className="max-w-7xl mx-auto">
+            <main className="flex-1 p-4 sm:p-6 lg:p-8">
+                <div className="w-full">
                     <div className="mb-6">
                         <h1 className="text-2xl sm:text-3xl font-bold text-[#221F20]">Assets Overview</h1>
                         <p className="mt-1 text-sm text-gray-600">Manage and track all company assets from one place.</p>
@@ -229,7 +230,11 @@ const App: React.FC = () => {
                         assets={assets}
                         categories={categories}
                         activeFilter={dashboardFilter}
-                        onFilterChange={setDashboardFilter}
+                        onFilterChange={(filter) => {
+                            setDashboardFilter(prev =>
+                                prev === filter ? 'all' : filter
+                            );
+                        }}
                     />
 
                     <div className="lg:grid lg:grid-cols-12 lg:gap-8 mt-6">

@@ -18,9 +18,9 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 }) => {
     const totalAssets = assets.length;
     const totalQuantity = assets.reduce((sum, asset) => sum + (asset.quantity ?? 0), 0);
-    const inUseCount = assets.filter(asset => asset.status === 'In Use').length;
-    const inStorageCount = assets.filter(asset => asset.status === 'In Storage').length;
-    const forRepairCount = assets.filter(asset => asset.status === 'For Repair').length;
+    const inUseCount = assets.filter(asset => asset.status?.toLowerCase() === 'in use').length;
+    const inStorageCount = assets.filter(asset => asset.status?.toLowerCase() === 'in storage').length;
+    const forRepairCount = assets.filter(asset => asset.status?.toLowerCase() === 'for repair').length;
     const categoryCount = categories.length;
 
     const cards: Array<{

@@ -116,7 +116,7 @@ app.post('/assets', async (req, res) => {
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
             RETURNING *;
         `;
-        const values = [asset_code, asset_name, model || null, fa_ledger || null, date_of_purchase || null, cost_of_asset, useful_life || null, number_marked || null, quantity, assigned_to || null, location || null, closing_stock_rs, status, remarks || null, category_id];
+        const values = [asset_code, asset_name, model || null, fa_ledger || null, date_of_purchase || null, cost_of_asset, useful_life || null, number_marked || null, quantity ?? null, assigned_to || null, location || null, closing_stock_rs, status, remarks || null, category_id];
         const { rows } = await pool.query(query, values);
         res.status(201).json(rows[0]);
     } catch (err) {
@@ -136,7 +136,7 @@ app.put('/assets/:id', async (req, res) => {
             WHERE id = $16
             RETURNING *;
         `;
-        const values = [asset_code, asset_name, model || null, fa_ledger || null, date_of_purchase || null, cost_of_asset, useful_life || null, number_marked || null, quantity, assigned_to || null, location || null, closing_stock_rs, status, remarks || null, category_id, id];
+        const values = [asset_code, asset_name, model || null, fa_ledger || null, date_of_purchase || null, cost_of_asset, useful_life || null, number_marked || null, quantity ?? null, assigned_to || null, location || null, closing_stock_rs, status, remarks || null, category_id, id];
         const { rows } = await pool.query(query, values);
         res.json(rows[0]);
     } catch (err) {

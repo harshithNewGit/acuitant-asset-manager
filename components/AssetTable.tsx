@@ -121,7 +121,7 @@ const AssetTable: React.FC<AssetTableProps> = ({
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         <StatusPill status={asset.status} />
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{asset.quantity}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{asset.quantity ?? '-'}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{asset.location}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{asset.assigned_to}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">

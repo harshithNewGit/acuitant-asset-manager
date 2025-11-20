@@ -17,11 +17,9 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     onFilterChange,
 }) => {
     const totalAssets = assets.length;
-    const totalQuantity = assets.reduce((sum, asset) => sum + (asset.quantity ?? 0), 0);
-    const inUseCount = assets.filter(asset => asset.status?.toLowerCase() === 'in use').length;
-    const inStorageCount = assets.filter(asset => asset.status?.toLowerCase() === 'in storage').length;
-    const forRepairCount = assets.filter(asset => asset.status?.toLowerCase() === 'for repair').length;
-    const categoryCount = categories.length;
+    const inUseCount = assets.filter(asset => asset.status?.toLowerCase().trim() === 'in use').length;
+    const inStorageCount = assets.filter(asset => asset.status?.toLowerCase().trim() === 'in storage').length;
+    const forRepairCount = assets.filter(asset => asset.status?.toLowerCase().trim() === 'for repair').length;
 
     const cards: Array<{
         label: string;
@@ -36,18 +34,6 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             helper: 'Individual asset records being tracked',
             filterKey: 'all',
             primary: true,
-        },
-        {
-            label: 'Total Quantity',
-            value: totalQuantity,
-            helper: 'Sum of all asset quantities',
-            filterKey: 'all',
-        },
-        {
-            label: 'Active Categories',
-            value: categoryCount,
-            helper: 'Organizational groups for assets',
-            filterKey: 'all',
         },
         {
             label: 'In Use',
@@ -74,11 +60,11 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
     return (
         <section aria-label="Asset dashboard" className="mb-6">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+            <div className="grid gap-4 grid-cols-2">
                 {cards.map(card => {
                     const isActive = card.primary && activeFilter === card.filterKey;
                     const baseClasses =
-                        'w-full text-left bg-white rounded-lg shadow-sm p-4 border flex flex-col justify-between transition-colors';
+                        'w-full text-left bg-white rounded-lg shadow-sm p-3 border flex flex-col justify-between transition-colors';
                     const activeClasses = ' border-red-500 ring-1 ring-red-500';
                     const inactiveClasses = ' border-gray-100 hover:border-gray-300 hover:bg-gray-50';
 

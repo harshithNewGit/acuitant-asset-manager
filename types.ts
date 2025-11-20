@@ -14,7 +14,7 @@ export interface Asset {
     cost_of_asset?: number;
     useful_life?: string; // Interval type
     number_marked?: string;
-    quantity: number;
+    quantity?: number;
     assigned_to?: string;
     location?: string;
     closing_stock_rs?: number;

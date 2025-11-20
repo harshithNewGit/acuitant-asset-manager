@@ -27,6 +27,7 @@ const App: React.FC = () => {
     const [isCategoryConfirmModalOpen, setIsCategoryConfirmModalOpen] = useState<boolean>(false);
     const [categoryToDeleteId, setCategoryToDeleteId] = useState<number | null>(null);
     const [dashboardFilter, setDashboardFilter] = useState<DashboardFilterKey>('all');
+    const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
 
     const fetchData = async () => {
         try {
@@ -48,6 +49,16 @@ const App: React.FC = () => {
         fetchData();
     }, []);
 
+    useEffect(() => {
+        const handleScroll = () => {
+            const y = window.scrollY || document.documentElement.scrollTop;
+            setShowScrollTop(y > 200);
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
 
     const filteredAssets = useMemo(() => {
         const statusFilter =
@@ -64,7 +75,7 @@ const App: React.FC = () => {
                 (asset.assigned_to && asset.assigned_to.toLowerCase().includes(searchTerm.toLowerCase())) ||
                 (asset.location && asset.location.toLowerCase().includes(searchTerm.toLowerCase()));
             const statusMatch = !statusFilter ||
-                (asset.status && asset.status.toLowerCase() === statusFilter);
+                (asset.status && asset.status.toLowerCase().trim() === statusFilter);
             return categoryMatch && searchMatch && statusMatch;
         });
     }, [assets, selectedCategory, searchTerm, dashboardFilter]);
@@ -216,6 +227,10 @@ const App: React.FC = () => {
         });
     };
 
+    const handleScrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     return (
         <div className="min-h-screen bg-gray-100 text-gray-800 flex flex-col">
             <Header />
@@ -225,17 +240,6 @@ const App: React.FC = () => {
                         <h1 className="text-2xl sm:text-3xl font-bold text-[#221F20]">Assets Overview</h1>
                         <p className="mt-1 text-sm text-gray-600">Manage and track all company assets from one place.</p>
                     </div>
-
-                    <DashboardOverview
-                        assets={assets}
-                        categories={categories}
-                        activeFilter={dashboardFilter}
-                        onFilterChange={(filter) => {
-                            setDashboardFilter(prev =>
-                                prev === filter ? 'all' : filter
-                            );
-                        }}
-                    />
 
                     <div className="lg:grid lg:grid-cols-12 lg:gap-8 mt-6">
                         <div className="lg:col-span-3 xl:col-span-2">
@@ -249,7 +253,19 @@ const App: React.FC = () => {
                         </div>
 
                         <div className="mt-6 lg:mt-0 lg:col-span-9 xl:col-span-10 space-y-6">
-                           <TodoList />
+                           <div className="grid gap-6 lg:grid-cols-2">
+                               <DashboardOverview
+                                   assets={assets}
+                                   categories={categories}
+                                   activeFilter={dashboardFilter}
+                                   onFilterChange={(filter) => {
+                                       setDashboardFilter(prev =>
+                                           prev === filter ? 'all' : filter
+                                       );
+                                   }}
+                               />
+                               <TodoList />
+                           </div>
                            <AssetTable
                                 assets={sortedAssets}
                                 searchTerm={searchTerm}
@@ -292,6 +308,17 @@ const App: React.FC = () => {
                 title="Delete Category"
                 message="Are you sure you want to delete this category? All assets in this category will have their category unset. This action cannot be undone."
             />
+
+            {showScrollTop && (
+                <button
+                    type="button"
+                    onClick={handleScrollToTop}
+                    className="fixed bottom-6 right-6 z-40 inline-flex items-center justify-center h-11 w-11 rounded-full bg-[#221F20] text-white shadow-lg hover:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                    aria-label="Scroll to top"
+                >
+                    <span className="text-lg leading-none">↑</span>
+                </button>
+            )}
         </div>
     );
 };

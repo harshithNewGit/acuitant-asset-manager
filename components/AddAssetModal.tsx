@@ -13,7 +13,7 @@ interface AddAssetModalProps {
 const initialFormState: Omit<Asset, 'id' | 'category'> = {
     asset_code: '',
     asset_name: '',
-    quantity: 1,
+    quantity: undefined,
     status: 'In Storage',
     model: '',
     fa_ledger: '',
@@ -115,7 +115,15 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ isOpen, onClose, onAddAss
                             </div>
                             <div>
                                 <label htmlFor="quantity" className="block text-sm font-medium text-gray-700">Quantity</label>
-                                <input type="number" name="quantity" id="quantity" value={formData.quantity} onChange={handleChange} min="1" required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 sm:text-sm" />
+                                <input
+                                    type="number"
+                                    name="quantity"
+                                    id="quantity"
+                                    value={formData.quantity ?? ''}
+                                    onChange={handleChange}
+                                    min="0"
+                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                                />
                             </div>
                             <div>
                                 <label htmlFor="assigned_to" className="block text-sm font-medium text-gray-700">Assigned To</label>

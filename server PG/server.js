@@ -33,7 +33,29 @@ pool.query('SELECT NOW()', (err, res) => {
 app.get('/assets', async (req, res) => {
     try {
         const query = `
-            SELECT a.id, a.asset_code, a.asset_name, a.model, a.fa_ledger, a.date_of_purchase, a.cost_of_asset, a.useful_life, a.number_marked, a.quantity, a.assigned_to, a.location, a.closing_stock_rs, a.status, a.remarks, a.category_id, c.name as category
+            SELECT
+                a.id,
+                a.asset_code,
+                a.asset_name,
+                a.model,
+                a.fa_ledger,
+                a.date_of_purchase,
+                a.cost_of_asset,
+                a.useful_life,
+                a.number_marked,
+                a.quantity,
+                a.assigned_to,
+                a.location,
+                a.closing_stock_rs,
+                a.status,
+                a.remarks,
+                a.category_id,
+                a.is_subscription,
+                a.subscription_vendor,
+                a.subscription_renewal_date,
+                a.subscription_billing_cycle,
+                a.subscription_url,
+                c.name as category
             FROM assets a
             LEFT JOIN categories c ON a.category_id = c.id
             ORDER BY a.asset_name;
@@ -109,14 +131,85 @@ app.get('/assets/:id', async (req, res) => {
 
 // POST a new asset
 app.post('/assets', async (req, res) => {
-    const { asset_code, asset_name, model, fa_ledger, date_of_purchase, cost_of_asset, useful_life, number_marked, quantity, assigned_to, location, closing_stock_rs, status, remarks, category_id } = req.body;
+    const {
+        asset_code,
+        asset_name,
+        model,
+        fa_ledger,
+        date_of_purchase,
+        cost_of_asset,
+        useful_life,
+        number_marked,
+        quantity,
+        assigned_to,
+        location,
+        closing_stock_rs,
+        status,
+        remarks,
+        category_id,
+        is_subscription,
+        subscription_vendor,
+        subscription_renewal_date,
+        subscription_billing_cycle,
+        subscription_url,
+    } = req.body;
+
     try {
         const query = `
-            INSERT INTO assets (asset_code, asset_name, model, fa_ledger, date_of_purchase, cost_of_asset, useful_life, number_marked, quantity, assigned_to, location, closing_stock_rs, status, remarks, category_id)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+            INSERT INTO assets (
+                asset_code,
+                asset_name,
+                model,
+                fa_ledger,
+                date_of_purchase,
+                cost_of_asset,
+                useful_life,
+                number_marked,
+                quantity,
+                assigned_to,
+                location,
+                closing_stock_rs,
+                status,
+                remarks,
+                category_id,
+                is_subscription,
+                subscription_vendor,
+                subscription_renewal_date,
+                subscription_billing_cycle,
+                subscription_url
+            )
+            VALUES (
+                $1, $2, $3, $4, $5,
+                $6, $7, $8, $9, $10,
+                $11, $12, $13, $14, $15,
+                $16, $17, $18, $19, $20
+            )
             RETURNING *;
         `;
-        const values = [asset_code, asset_name, model || null, fa_ledger || null, date_of_purchase || null, cost_of_asset, useful_life || null, number_marked || null, quantity ?? null, assigned_to || null, location || null, closing_stock_rs, status, remarks || null, category_id];
+
+        const values = [
+            asset_code,
+            asset_name,
+            model || null,
+            fa_ledger || null,
+            date_of_purchase || null,
+            cost_of_asset,
+            useful_life || null,
+            number_marked || null,
+            quantity ?? null,
+            assigned_to || null,
+            location || null,
+            closing_stock_rs,
+            status,
+            remarks || null,
+            category_id,
+            is_subscription ?? false,
+            subscription_vendor || null,
+            subscription_renewal_date || null,
+            subscription_billing_cycle || null,
+            subscription_url || null,
+        ];
+
         const { rows } = await pool.query(query, values);
         res.status(201).json(rows[0]);
     } catch (err) {
@@ -128,15 +221,81 @@ app.post('/assets', async (req, res) => {
 // PUT (update) an asset by ID
 app.put('/assets/:id', async (req, res) => {
     const { id } = req.params;
-    const { asset_code, asset_name, model, fa_ledger, date_of_purchase, cost_of_asset, useful_life, number_marked, quantity, assigned_to, location, closing_stock_rs, status, remarks, category_id } = req.body;
+    const {
+        asset_code,
+        asset_name,
+        model,
+        fa_ledger,
+        date_of_purchase,
+        cost_of_asset,
+        useful_life,
+        number_marked,
+        quantity,
+        assigned_to,
+        location,
+        closing_stock_rs,
+        status,
+        remarks,
+        category_id,
+        is_subscription,
+        subscription_vendor,
+        subscription_renewal_date,
+        subscription_billing_cycle,
+        subscription_url,
+    } = req.body;
+
     try {
         const query = `
             UPDATE assets
-            SET asset_code = $1, asset_name = $2, model = $3, fa_ledger = $4, date_of_purchase = $5, cost_of_asset = $6, useful_life = $7, number_marked = $8, quantity = $9, assigned_to = $10, location = $11, closing_stock_rs = $12, status = $13, remarks = $14, category_id = $15
-            WHERE id = $16
+            SET
+                asset_code = $1,
+                asset_name = $2,
+                model = $3,
+                fa_ledger = $4,
+                date_of_purchase = $5,
+                cost_of_asset = $6,
+                useful_life = $7,
+                number_marked = $8,
+                quantity = $9,
+                assigned_to = $10,
+                location = $11,
+                closing_stock_rs = $12,
+                status = $13,
+                remarks = $14,
+                category_id = $15,
+                is_subscription = $16,
+                subscription_vendor = $17,
+                subscription_renewal_date = $18,
+                subscription_billing_cycle = $19,
+                subscription_url = $20
+            WHERE id = $21
             RETURNING *;
         `;
-        const values = [asset_code, asset_name, model || null, fa_ledger || null, date_of_purchase || null, cost_of_asset, useful_life || null, number_marked || null, quantity ?? null, assigned_to || null, location || null, closing_stock_rs, status, remarks || null, category_id, id];
+
+        const values = [
+            asset_code,
+            asset_name,
+            model || null,
+            fa_ledger || null,
+            date_of_purchase || null,
+            cost_of_asset,
+            useful_life || null,
+            number_marked || null,
+            quantity ?? null,
+            assigned_to || null,
+            location || null,
+            closing_stock_rs,
+            status,
+            remarks || null,
+            category_id,
+            is_subscription ?? false,
+            subscription_vendor || null,
+            subscription_renewal_date || null,
+            subscription_billing_cycle || null,
+            subscription_url || null,
+            id,
+        ];
+
         const { rows } = await pool.query(query, values);
         res.json(rows[0]);
     } catch (err) {

@@ -24,7 +24,17 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({ isOpen, onClose, assetT
 
     const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         if (!formData) return;
-        const { name, value } = e.target;
+        const { name, value, type } = e.target;
+
+        if (type === 'checkbox') {
+            const target = e.target as HTMLInputElement;
+            setFormData(prev => ({
+                ...prev!,
+                [name]: target.checked,
+            }));
+            return;
+        }
+
         const isNumeric = ['quantity', 'cost_of_asset', 'closing_stock_rs', 'category_id'].includes(name);
         setFormData(prev => ({
             ...prev!,
@@ -128,6 +138,73 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({ isOpen, onClose, assetT
                                 <label htmlFor="location" className="block text-sm font-medium text-gray-700">Location</label>
                                 <input type="text" name="location" id="location" value={formData.location || ''} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 sm:text-sm" />
                             </div>
+                            <div className="sm:col-span-2">
+                                <div className="flex items-center space-x-2">
+                                    <input
+                                        id="is_subscription"
+                                        name="is_subscription"
+                                        type="checkbox"
+                                        checked={!!formData.is_subscription}
+                                        onChange={handleChange}
+                                        className="h-4 w-4 text-[#DA3832] border-gray-300 rounded focus:ring-red-500"
+                                    />
+                                    <label htmlFor="is_subscription" className="text-sm font-medium text-gray-700">
+                                        This asset is a subscription
+                                    </label>
+                                </div>
+                            </div>
+                            {formData.is_subscription && (
+                                <>
+                                    <div>
+                                        <label htmlFor="subscription_vendor" className="block text-sm font-medium text-gray-700">Subscription Vendor</label>
+                                        <input
+                                            type="text"
+                                            name="subscription_vendor"
+                                            id="subscription_vendor"
+                                            value={formData.subscription_vendor || ''}
+                                            onChange={handleChange}
+                                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="subscription_billing_cycle" className="block text-sm font-medium text-gray-700">Billing Cycle</label>
+                                        <input
+                                            type="text"
+                                            name="subscription_billing_cycle"
+                                            id="subscription_billing_cycle"
+                                            placeholder="Monthly, Annual, etc."
+                                            value={formData.subscription_billing_cycle || ''}
+                                            onChange={handleChange}
+                                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="subscription_renewal_date" className="block text-sm font-medium text-gray-700">Renewal Date</label>
+                                        <input
+                                            type="date"
+                                            name="subscription_renewal_date"
+                                            id="subscription_renewal_date"
+                                            value={formData.subscription_renewal_date
+                                                ? new Date(formData.subscription_renewal_date).toISOString().split('T')[0]
+                                                : ''}
+                                            onChange={handleChange}
+                                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="subscription_url" className="block text-sm font-medium text-gray-700">Subscription URL</label>
+                                        <input
+                                            type="url"
+                                            name="subscription_url"
+                                            id="subscription_url"
+                                            value={formData.subscription_url || ''}
+                                            onChange={handleChange}
+                                            placeholder="Login or billing portal link"
+                                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                                        />
+                                    </div>
+                                </>
+                            )}
                             <div className="sm:col-span-2">
                                 <label htmlFor="remarks" className="block text-sm font-medium text-gray-700">Remarks</label>
                                 <textarea name="remarks" id="remarks" value={formData.remarks || ''} onChange={handleChange} rows={3} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 sm:text-sm"></textarea>

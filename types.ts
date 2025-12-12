@@ -22,6 +22,11 @@ export interface Asset {
     remarks?: string;
     category_id?: number;
     category?: string; // from JOIN
+    is_subscription?: boolean;
+    subscription_vendor?: string;
+    subscription_renewal_date?: string;
+    subscription_billing_cycle?: string;
+    subscription_url?: string;
 }
 
 export type AssetSortKey = 'asset_code' | 'asset_name' | 'status' | 'quantity' | 'location' | 'assigned_to';

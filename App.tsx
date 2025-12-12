@@ -10,6 +10,7 @@ import EditAssetModal from './components/EditAssetModal';
 import ConfirmationModal from './components/ConfirmationModal';
 import DashboardOverview from './components/DashboardOverview';
 import TodoList from './components/TodoList';
+import SubscriptionManager from './components/SubscriptionManager';
 
 type DashboardFilterKey = 'all' | 'in_use' | 'in_storage' | 'for_repair';
 
@@ -28,6 +29,7 @@ const App: React.FC = () => {
     const [categoryToDeleteId, setCategoryToDeleteId] = useState<number | null>(null);
     const [dashboardFilter, setDashboardFilter] = useState<DashboardFilterKey>('all');
     const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
+    const [isAddingSubscription, setIsAddingSubscription] = useState<boolean>(false);
 
     const fetchData = async () => {
         try {
@@ -158,7 +160,7 @@ const App: React.FC = () => {
             if (response.ok) {
                 await fetchData(); // Refetch to get the latest state
                 setIsAddModalOpen(false);
-                // The form state in AddAssetModal will reset when it re-opens because it's keyed to its open/closed state.
+                setIsAddingSubscription(false);
             }
         } catch (error) {
             console.error("Failed to add asset:", error);
@@ -218,6 +220,11 @@ const App: React.FC = () => {
         setAssetToDeleteId(null);
     };
 
+    const handleOpenAddAssetModal = (asSubscription: boolean) => {
+        setIsAddingSubscription(asSubscription);
+        setIsAddModalOpen(true);
+    };
+
     const handleSort = (key: AssetSortKey) => {
         setSortConfig(prev => {
             if (prev?.key === key) {
@@ -264,13 +271,19 @@ const App: React.FC = () => {
                                        );
                                    }}
                                />
-                               <TodoList />
+                               <div className="space-y-6">
+                                   <TodoList />
+                                   <SubscriptionManager
+                                       assets={assets}
+                                       onAddSubscriptionClick={() => handleOpenAddAssetModal(true)}
+                                   />
+                               </div>
                            </div>
                            <AssetTable
                                 assets={sortedAssets}
                                 searchTerm={searchTerm}
                                 setSearchTerm={setSearchTerm}
-                                onAddAssetClick={() => setIsAddModalOpen(true)}
+                                onAddAssetClick={() => handleOpenAddAssetModal(false)}
                                 onSelectAsset={handleSelectAsset}
                                 onDeleteRequest={handleDeleteRequest}
                                 sortConfig={sortConfig}
@@ -282,9 +295,13 @@ const App: React.FC = () => {
             </main>
             <AddAssetModal
                 isOpen={isAddModalOpen}
-                onClose={() => setIsAddModalOpen(false)}
+                onClose={() => {
+                    setIsAddModalOpen(false);
+                    setIsAddingSubscription(false);
+                }}
                 onAddAsset={handleAddAsset}
                 categories={categories}
+                initialIsSubscription={isAddingSubscription}
             />
             <EditAssetModal
                 isOpen={isEditModalOpen}

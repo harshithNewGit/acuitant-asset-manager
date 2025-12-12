@@ -3,11 +3,17 @@ import express from 'express';
 import { Pool } from 'pg';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3001;
+const isProduction = process.env.NODE_ENV === 'production';
 
 app.use(cors());
 app.use(express.json());
@@ -402,6 +408,41 @@ app.delete('/todos/:id', async (req, res) => {
     }
 });
 
+// Health check endpoint
+app.get('/health', async (req, res) => {
+    try {
+        await pool.query('SELECT 1');
+        res.json({ 
+            status: 'ok', 
+            database: 'connected',
+            timestamp: new Date().toISOString()
+        });
+    } catch (err) {
+        console.error('Health check failed', err);
+        res.status(503).json({ 
+            status: 'error', 
+            database: 'disconnected',
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
+// Serve static files from React build in production
+if (isProduction) {
+    const distPath = path.join(__dirname, '..', 'dist');
+    
+    // Serve static assets (JS, CSS, images, etc.)
+    app.use(express.static(distPath));
+    
+    // Serve React app for all non-API routes (must be last)
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(distPath, 'index.html'));
+    });
+}
+
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
+    if (isProduction) {
+        console.log(`Serving static files from: ${path.join(__dirname, '..', 'dist')}`);
+    }
 });

@@ -27,4 +27,3 @@ server PG/.env
 *.njsproj
 *.sln
 *.sw?
-server PG/.env
